@@ -1,1 +1,192 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Profil Mahasiswa – Arshi Nada</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --plate:#e9ecef; --ink:#1b1b2f;
+    --yellow:#ffd23f; --red:#ee4266; --blue:#3a86ff; --green:#2ec4b6; --orange:#ff9f1c;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;background:var(--plate);color:var(--ink);
+       font-family:'Fredoka',system-ui,sans-serif;padding:24px 16px 48px}
+  header{max-width:960px;margin:0 auto 20px;display:flex;flex-wrap:wrap;gap:12px;
+         justify-content:space-between;align-items:center}
+  header p{margin:0;font-size:15px}
+  button{font:inherit;font-weight:600;border:0;border-radius:999px;padding:8px 18px;
+         background:var(--ink);color:#fff;cursor:pointer}
+  button:focus-visible,.brick:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 
+  /* Kanvas lego di belakang semua konten */
+  #lego{position:fixed;inset:0;width:100%;height:100%;z-index:0;touch-action:none}
+  /* Konten di atas kanvas; area kosong "tembus" sehingga lego di belakang bisa disentuh */
+  header,.board{position:relative;z-index:1;pointer-events:none}
+  header p,header button,.brick{pointer-events:auto}
+
+  /* Papan 4 kolom, tiap blok = 1 "brick" */
+  .board{max-width:960px;margin:0 auto;display:grid;gap:14px;
+         grid-template-columns:repeat(4,1fr);grid-auto-rows:150px}
+  .brick{position:relative;border-radius:18px;padding:26px 20px 18px;color:#fff;
+         cursor:grab;box-shadow:0 6px 0 rgba(0,0,0,.22);
+         transition:transform .15s, box-shadow .15s;overflow:hidden}
+  .brick:hover{transform:translateY(-3px);box-shadow:0 9px 0 rgba(0,0,0,.22)}
+  .brick:active{cursor:grabbing}
+  .brick.dragging{opacity:.4}
+  .brick.over{outline:3px dashed var(--ink);outline-offset:4px}
+  /* Stud (bulatan kecil di atas brick seperti lego) */
+  .brick::before{content:"";position:absolute;top:7px;left:16px;width:80px;height:8px;
+    background:radial-gradient(circle at 8px 4px,rgba(255,255,255,.5) 4px,transparent 5px) 0 0/20px 8px repeat-x}
+  h1,h2{margin:0 0 6px;line-height:1.1}
+  h1{font-size:clamp(28px,4vw,40px)}
+  h2{font-size:20px}
+  .brick p{margin:0;font-size:15px;line-height:1.4}
+  .small{font-size:13px;opacity:.9}
+
+  /* Ukuran tiap blok */
+  .b-nama{grid-column:span 2;grid-row:span 2;background:var(--blue)}
+  .b-foto{grid-column:span 2;grid-row:span 2;background:var(--yellow);color:var(--ink);padding:0}
+  .b-prodi{grid-column:span 2;background:var(--red)}
+  .b-deskripsi{grid-column:span 2;background:var(--green);color:var(--ink)}
+  .b-hobi{grid-column:span 3;background:var(--orange);color:var(--ink)}
+  .b-ig{grid-column:span 1;background:var(--ink);display:flex;align-items:flex-end}
+  .b-foto::before{display:none}
+  .b-foto svg,.b-foto img{width:100%;height:100%;display:block;object-fit:cover}
+  .b-ig a{color:#fff;font-weight:700;font-size:18px;text-decoration:none}
+  .b-ig a:hover{text-decoration:underline}
+
+  /* Chip hobi */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .chip{background:#fff;color:var(--ink);padding:6px 14px}
+  .chip[aria-pressed="true"]{background:var(--ink);color:#fff}
+  #hobiInfo{margin-top:8px;font-size:14px;min-height:20px}
+
+  @media (max-width:720px){
+    .board{grid-template-columns:repeat(2,1fr);grid-auto-rows:140px}
+    .b-nama,.b-foto,.b-prodi,.b-deskripsi,.b-hobi,.b-ig{grid-column:span 2}
+    .b-nama,.b-foto,.b-hobi{grid-row:span 2}
+  }
+  @media (prefers-reduced-motion:reduce){.brick{transition:none}}
+</style>
+</head>
+<body>
+<canvas id="lego" aria-hidden="true"></canvas>
+
+<header>
+  <p><strong>Tips:</strong> BOX LEGONYA BISA DIMAININ LOHHH EH DISUSUN (tarik, lempar, tumpuk).</p>
+  <div>
+    <button id="hujan">Hujan lego</button>
+    <button id="bersih">Bersihkan lego</button>
+    <button id="acak">Acak susunan</button>
+    <button id="reset">Kembalikan</button>
+  </div>
+</header>
+
+<main class="board" id="board">
+
+  <!-- 1. Nama & identitas -->
+  <section class="brick b-nama" draggable="true" tabindex="0">
+    <h1>Arshi Nada</h1>
+    <p>NIM: 025241461103</p>
+    <p>Sekolah Tinggi Multi Media · Angkatan 2026</p>
+  </section>
+
+  <!-- 2. Foto / ilustrasi -->
+  <section class="brick b-foto" draggable="true" tabindex="0">
+    <!-- Kalau punya foto, ganti <svg> ini dengan: <img src="foto.jpg" alt="Foto profil"> -->
+    <svg viewBox="0 0 200 200" role="img" aria-label="Ilustrasi profil" preserveAspectRatio="xMidYMid slice">
+      <rect width="200" height="200" fill="#ffd23f"/>
+      <circle cx="100" cy="82" r="38" fill="#ffd9b8"/>
+      <path d="M60 78c0-30 22-44 42-44s38 14 38 44c-12-14-26-20-40-20s-28 6-40 20z" fill="#1b1b2f"/>
+      <circle cx="87" cy="86" r="4" fill="#1b1b2f"/><circle cx="113" cy="86" r="4" fill="#1b1b2f"/>
+      <path d="M88 102q12 10 24 0" stroke="#1b1b2f" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M30 200c4-44 34-64 70-64s66 20 70 64z" fill="#3a86ff"/>
+    </svg>
+  </section>
+
+  <!-- 3. Program studi -->
+  <section class="brick b-prodi" draggable="true" tabindex="0">
+    <h2>Program Studi</h2>
+    <p>Manajemen Informasi dan Komunikasi</p>
+    <p class="small">Semester 3</p>
+  </section>
+
+  <!-- 4. Deskripsi singkat -->
+  <section class="brick b-deskripsi" draggable="true" tabindex="0">
+    <h2>About Nada</h2>
+    <p>Perempuan yang bukan tinggal di Solo tapi selalu ngaku orang Solo.</p>
+  </section>
+
+  <!-- 5. Hobi / minat (klik chip untuk lihat detail) -->
+  <section class="brick b-hobi" draggable="true" tabindex="0">
+    <h2>Hobi &amp; Minat</h2>
+    <div class="chips" id="chips">
+      <button class="chip" aria-pressed="false" data-info="Lagu kebangsaan setiap buka spotify adalah All I Need To Hear 1975.">Musik</button>
+      <button class="chip" aria-pressed="false" data-info="Suka banget membaca majalah, berita HOT, buku, dan AU.">Membaca</button>
+      <button class="chip" aria-pressed="false" data-info="First Dream jadi atlet dan sampai sekarang cinta sama renang.">Berenang</button>
+      <button class="chip" aria-pressed="false" data-info="Williams Racing Girls Carlos Sainz 55 (Nonton bcs Someone).">Watching Formula One</button>
+    </div>
+    <p id="hobiInfo">Klik salah satu hobi.</p>
+  </section>
+
+  <!-- 6. Sosial media -->
+  <section class="brick b-ig" draggable="true" tabindex="0">
+    <a href="https://instagram.com/shinaada_" target="_blank" rel="noopener">Instagram<br>@shinaada_</a>
+  </section>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+<script>
+  const board = document.getElementById('board');
+  const urutanAwal = [...board.children]; // simpan urutan asli untuk tombol "Kembalikan"
+  let dragged = null;
+
+  // --- Drag & drop: tukar posisi dua blok ---
+  board.addEventListener('dragstart', e => {
+    dragged = e.target.closest('.brick');
+    if (!dragged) return;
+    dragged.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', 'brick'); // dibutuhkan Firefox
+  });
+  board.addEventListener('dragover', e => {
+    e.preventDefault(); // wajib agar blok boleh "dijatuhkan"
+    document.querySelectorAll('.over').forEach(b => b.classList.remove('over'));
+    const target = e.target.closest('.brick');
+    if (target && target !== dragged) target.classList.add('over');
+  });
+  board.addEventListener('drop', e => {
+    e.preventDefault();
+    const target = e.target.closest('.brick');
+    if (!dragged || !target || target === dragged) return;
+    // tukar posisi dengan penanda sementara
+    const penanda = document.createElement('span');
+    target.before(penanda);
+    dragged.before(target);
+    penanda.replaceWith(dragged);
+  });
+  board.addEventListener('dragend', () => {
+    document.querySelectorAll('.dragging,.over').forEach(b => b.classList.remove('dragging','over'));
+    dragged = null;
+  });
+
+  // --- Tombol acak & kembalikan (berguna di HP yang tidak bisa drag) ---
+  document.getElementById('acak').onclick = () =>
+    [...board.children].sort(() => Math.random() - 0.5).forEach(b => board.appendChild(b));
+  document.getElementById('reset').onclick = () =>
+    urutanAwal.forEach(b => board.appendChild(b));
+
+  // --- Chip hobi: tampilkan keterangan ---
+  const info = document.getElementById('hobiInfo');
+  document.getElementById('chips').addEventListener('click', e => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', c === chip));
+    info.textContent = chip.dataset.info;
+  });
+</script>
+</body>
+</html>
