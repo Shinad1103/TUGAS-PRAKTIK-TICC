@@ -57,6 +57,30 @@
   .b-ig a{color:#fff;font-weight:700;font-size:18px;text-decoration:none}
   .b-ig a:hover{text-decoration:underline}
 
+  /* Kanvas gambar (coretan) + toolbar */
+  body{position:relative}
+  #coret{position:absolute;top:0;left:0;z-index:3;pointer-events:none}
+  #coret.aktif{pointer-events:auto;cursor:crosshair;touch-action:none}
+  #alat{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:10;max-width:94vw;
+        display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;
+        background:#fff;padding:10px 14px;border-radius:22px;box-shadow:0 6px 0 rgba(0,0,0,.22)}
+  #alat button{padding:6px 14px;font-size:14px}
+  #alat button[aria-pressed="true"]{background:var(--red)}
+  #panelGambar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center}
+  #panelGambar[hidden]{display:none}
+  .warna{width:28px;height:28px;padding:0!important;border-radius:50%!important;border:3px solid #fff!important;box-shadow:0 0 0 2px var(--ink)}
+  .warna.on{box-shadow:0 0 0 4px var(--ink)}
+  #tebal{width:90px}
+
+  /* Animasi avatar */
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+  @keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+  @keyframes melayang{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-10px) rotate(12deg)}}
+  .avatar .orang{animation:bob 3s ease-in-out infinite}
+  .avatar .eye{transform-box:fill-box;transform-origin:center;animation:blink 4s infinite}
+  .avatar .mini{transform-box:fill-box;transform-origin:center;animation:melayang 3s ease-in-out infinite}
+  @media (prefers-reduced-motion:reduce){.avatar *{animation:none!important}}
+
   /* Chip hobi */
   .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
   .chip{background:#fff;color:var(--ink);padding:6px 14px}
@@ -73,10 +97,26 @@
 </head>
 <body>
 <canvas id="lego" aria-hidden="true"></canvas>
+<canvas id="coret" aria-hidden="true"></canvas>
+
+<!-- Toolbar menggambar -->
+<div id="alat" role="toolbar" aria-label="Alat gambar">
+  <button id="modeGambar" aria-pressed="false">Mode gambar</button>
+  <div id="panelGambar" hidden>
+    <span id="paletWarna" style="display:flex;gap:8px"></span>
+    <input type="range" id="tebal" min="2" max="40" value="8" aria-label="Ketebalan kuas">
+    <button id="penghapus" aria-pressed="false">Penghapus</button>
+    <button id="urungkan">Urungkan</button>
+    <button id="hapusSemua">Hapus semua</button>
+    <button id="simpanGambar">Simpan PNG</button>
+  </div>
+</div>
 
 <header>
-  <p><strong>Tips:</strong> BOX LEGONYA BISA DIMAININ LOHHH EH DISUSUN (tarik, lempar, tumpuk).</p>
+  <p><strong>Tips:</strong> Bisa diacak atau disusun lho box legonya, atau klik &quot;Mode gambar&quot; di bawah buat coret-coret halaman.</p>
   <div>
+    <button id="hujan">Hujan lego</button>
+    <button id="bersih">Bersihkan lego</button>
     <button id="acak">Acak susunan</button>
     <button id="reset">Kembalikan</button>
   </div>
@@ -86,46 +126,71 @@
 
   <section class="brick b-nama" draggable="true" tabindex="0">
     <h1>Arshi Nada</h1>
-    <p>NIM: 025241461103</p>
+    <p>NIM:025241461103</p>
     <p>Sekolah Tinggi Multi Media · Angkatan 2026</p>
   </section>
 
   <section class="brick b-foto" draggable="true" tabindex="0">
-    <svg viewBox="0 0 200 200" role="img" aria-label="Ilustrasi profil" preserveAspectRatio="xMidYMid slice">
-      <rect width="200" height="200" fill="#ffd23f"/>
-      <circle cx="100" cy="82" r="38" fill="#ffd9b8"/>
-      <path d="M60 78c0-30 22-44 42-44s38 14 38 44c-12-14-26-20-40-20s-28 6-40 20z" fill="#1b1b2f"/>
-      <circle cx="87" cy="86" r="4" fill="#1b1b2f"/><circle cx="113" cy="86" r="4" fill="#1b1b2f"/>
-      <path d="M88 102q12 10 24 0" stroke="#1b1b2f" stroke-width="4" fill="none" stroke-linecap="round"/>
-      <path d="M30 200c4-44 34-64 70-64s66 20 70 64z" fill="#3a86ff"/>
+    <!-- Ilustrasi kartun animasi: hijab, ikat kepala biru, kacamata pink, kaos navy bertulis LOTM -->
+    <svg class="avatar" viewBox="0 0 200 200" role="img" aria-label="Ilustrasi kartun profil dengan hijab dan kacamata" preserveAspectRatio="xMidYMid meet">
+      <!-- lego mini yang melayang -->
+      <g class="mini" style="animation-delay:0s"><rect x="14" y="40" width="28" height="16" rx="3" fill="#ee4266"/><circle cx="21" cy="38" r="3.5" fill="#ee4266"/><circle cx="35" cy="38" r="3.5" fill="#ee4266"/></g>
+      <g class="mini" style="animation-delay:-1s"><rect x="160" y="62" width="28" height="16" rx="3" fill="#2ec4b6"/><circle cx="167" cy="60" r="3.5" fill="#2ec4b6"/><circle cx="181" cy="60" r="3.5" fill="#2ec4b6"/></g>
+      <g class="mini" style="animation-delay:-2s"><rect x="150" y="14" width="20" height="16" rx="3" fill="#3a86ff"/><circle cx="160" cy="12" r="3.5" fill="#3a86ff"/></g>
+
+      <g class="orang">
+        <!-- kaos navy + tali ID card -->
+        <path d="M22 200c4-44 36-60 78-60s74 16 78 60z" fill="#1f2a5c"/>
+        <path d="M78 146l14 54M122 146l-14 54" stroke="#0f1736" stroke-width="5" fill="none"/>
+        <!-- hijab -->
+        <path d="M46 92C46 48 74 30 100 30s54 18 54 62c0 28 6 46-4 66H50c-10-20-4-38-4-66z" fill="#1c1c24"/>
+        <!-- wajah -->
+        <ellipse cx="100" cy="94" rx="32" ry="36" fill="#f3c9a5"/>
+        <!-- ikat kepala biru -->
+        <path d="M68 76Q100 56 132 76L132 86Q100 68 68 86Z" fill="#24408e"/>
+        <!-- pipi -->
+        <circle cx="76" cy="108" r="6" fill="#f08a8a" opacity=".45"/><circle cx="124" cy="108" r="6" fill="#f08a8a" opacity=".45"/>
+        <!-- mata (berkedip) -->
+        <ellipse class="eye" cx="86" cy="96" rx="4" ry="5" fill="#1b1b2f"/>
+        <ellipse class="eye" cx="114" cy="96" rx="4" ry="5" fill="#1b1b2f"/>
+        <!-- kacamata oranye -->
+        <circle cx="86" cy="96" r="13" fill="rgba(255,255,255,.2)" stroke="#e0782f" stroke-width="3"/>
+        <circle cx="114" cy="96" r="13" fill="rgba(255,255,255,.2)" stroke="#e0782f" stroke-width="3"/>
+        <path d="M99 96h2" stroke="#e0782f" stroke-width="3"/>
+        <!-- senyum -->
+        <path d="M91 113Q100 121 109 113" stroke="#1b1b2f" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      </g>
     </svg>
   </section>
 
   <section class="brick b-prodi" draggable="true" tabindex="0">
     <h2>Program Studi</h2>
-    <p>Manajemen Informasi dan Komunikasi</p>
+    <p>Manajemen Infomasi dan Komunikasi</p>
     <p class="small">Semester 3</p>
   </section>
-
+  
   <section class="brick b-deskripsi" draggable="true" tabindex="0">
-    <h2>About Nada</h2>
-    <p>Perempuan yang bukan tinggal di Solo tapi selalu ngaku orang Solo.</p>
+    <h2>Tentang Saya</h2>
+    <p>Aku bukan tinggal di Solo kota tapi selalu ngaku kalau orang Solo.</p>
+    <p>Orang yang punya penasaran tinggi dan belajar hal baru tapi gamau pusing.</p>
+    <p>"Still learning, still exploring, and enjoying the process!".</p>
+    </p>
   </section>
 
   <section class="brick b-hobi" draggable="true" tabindex="0">
     <h2>Hobi &amp; Minat</h2>
     <div class="chips" id="chips">
       <button class="chip" aria-pressed="false" data-info="Lagu kebangsaan setiap buka spotify adalah All I Need To Hear 1975.">Musik</button>
-      <button class="chip" aria-pressed="false" data-info="Suka banget membaca majalah, berita HOT, buku, dan AU.">Membaca</button>
-      <button class="chip" aria-pressed="false" data-info="First Dream jadi atlet dan sampai sekarang cinta sama renang.">Berenang</button>
-      <button class="chip" aria-pressed="false" data-info="Williams Racing Girls Carlos Sainz 55 (Nonton bcs Someone).">Watching Formula One</button>
-      <button class="chip" aria-pressed="false" data-info="Suka nyanyi bahasa asing, tapi kalau ngomong kok medhok ya.">Nyanyi</button>
-      <div>
+      <button class="chip" aria-pressed="false" data-info="Suka dan rajin buka portal berita random, membaca Alternative Universe dan majalah Bobo.">Membaca</button>
+      <button class="chip" aria-pressed="false" data-info="First Dream jadi altet, dan sekarang cinta sama renang.">Berenang</button>
+      <button class="chip" aria-pressed="false" data-info="Williams Racing Girls Carlos Sainz n Alex Albon.">Watching Formula One</button>
+      <button class="chip" aria-pressed="false" data-info="Suka nyanyi bahasa asing, tapi kalau ngomong medhok ya.">menyannyi</button>
+    </div>
     <p id="hobiInfo">Klik salah satu hobi.</p>
   </section>
-  
+
   <section class="brick b-ig" draggable="true" tabindex="0">
-    <a href="https://instagram.com/shinaada_" target="_blank" rel="noopener">Instagram<br>@shinaada_</a>
+    <a href="https://instagram.com/@shinaada_" target="_blank" rel="noopener">Instagram<br>@shinaada_</a>
   </section>
 
 </main>
@@ -142,7 +207,7 @@
     if (!dragged) return;
     dragged.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', 'brick'); // dibutuhkan Firefox
+    e.dataTransfer.setData('text/plain', 'brick'); 
   });
   board.addEventListener('dragover', e => {
     e.preventDefault(); // wajib agar blok boleh "dijatuhkan"
@@ -179,6 +244,187 @@
     document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', c === chip));
     info.textContent = chip.dataset.info;
   });
+
+  // ===== LEGO BERTERBANGAN (fisika memakai Matter.js) =====
+  const { Engine, Bodies, Body, Composite, Mouse, MouseConstraint } = Matter;
+  const cv = document.getElementById('lego');
+  const ctx = cv.getContext('2d');
+  const engine = Engine.create();           // "dunia" fisika dengan gravitasi
+  const warna = ['#ffd23f', '#ee4266', '#3a86ff', '#2ec4b6', '#ff9f1c'];
+  const ukuran = [[1,1],[2,1],[3,1],[4,1],[2,2]]; // kolom x baris stud
+  const daftar = [];                        // semua lego yang ada
+  let U = 40, W = 0, H = 0, dinding = [], mouse;
+
+  function ukurLayar() {
+    const dpr = window.devicePixelRatio || 1;
+    W = innerWidth; H = innerHeight; U = W < 720 ? 30 : 40;
+    cv.width = W * dpr; cv.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (mouse) mouse.pixelRatio = dpr;
+    Composite.remove(engine.world, dinding);  // pasang ulang lantai & dinding
+    const t = 200, opsi = { isStatic: true };
+    dinding = [
+      Bodies.rectangle(W / 2, H + t / 2, W * 3, t, opsi),   // lantai
+      Bodies.rectangle(-t / 2, H / 2, t, H * 4, opsi),      // dinding kiri
+      Bodies.rectangle(W + t / 2, H / 2, t, H * 4, opsi)    // dinding kanan
+    ];
+    Composite.add(engine.world, dinding);
+  }
+
+  function tambahLego(x) {
+    const [c, r] = ukuran[Math.floor(Math.random() * ukuran.length)];
+    const w = c * U, h = r * U;
+    const b = Bodies.rectangle(x ?? Math.random() * W, -h, w, h,
+      { restitution: 0.3, friction: 0.6 });
+    b.lego = { c, r, w, h, warna: warna[Math.floor(Math.random() * warna.length)] };
+    Body.setAngle(b, (Math.random() - 0.5) * 1.2);
+    Composite.add(engine.world, b);
+    daftar.push(b);
+    if (daftar.length > 70) Composite.remove(engine.world, daftar.shift()); // batasi jumlah
+  }
+
+  function gambar() {
+    ctx.clearRect(0, 0, W, H);
+    for (const b of daftar) {
+      const { c, r, w, h, warna } = b.lego;
+      ctx.save();
+      ctx.translate(b.position.x, b.position.y);
+      ctx.rotate(b.angle);
+      ctx.fillStyle = warna; ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.roundRect(-w / 2, -h / 2, w, h, 6); ctx.fill(); ctx.stroke();
+      for (let i = 0; i < c; i++) for (let j = 0; j < r; j++) { // stud di atas brick
+        ctx.beginPath();
+        ctx.arc(-w / 2 + U / 2 + i * U, -h / 2 + U / 2 + j * U, U * 0.28, 0, 7);
+        ctx.fillStyle = 'rgba(255,255,255,.3)'; ctx.fill(); ctx.stroke();
+      }
+      ctx.restore();
+    }
+  }
+
+  function loop() {
+    Engine.update(engine, 1000 / 60);
+    gambar();
+    requestAnimationFrame(loop);
+  }
+
+  ukurLayar();
+  mouse = Mouse.create(cv);
+  mouse.pixelRatio = window.devicePixelRatio || 1;
+  // supaya scroll mouse tetap menggulung halaman
+  ['mousewheel', 'DOMMouseScroll', 'wheel'].forEach(n => cv.removeEventListener(n, mouse.mousewheel));
+  // MouseConstraint = kamu bisa menarik & melempar lego
+  Composite.add(engine.world, MouseConstraint.create(engine, {
+    mouse, constraint: { stiffness: 0.2, render: { visible: false } }
+  }));
+  addEventListener('resize', ukurLayar);
+
+  const hujan = (n = 14) => { for (let i = 0; i < n; i++) setTimeout(() => tambahLego(), i * 150); };
+  document.getElementById('hujan').onclick = () => hujan();
+  document.getElementById('bersih').onclick = () => {
+    daftar.splice(0).forEach(b => Composite.remove(engine.world, b));
+  };
+  hujan(18);   // lego jatuh otomatis saat halaman dibuka
+  loop();
+
+  // ===== MODE GAMBAR (coret-coret di atas halaman) =====
+  (function () {
+    const kanvas = document.getElementById('coret');
+    const g = kanvas.getContext('2d');
+    const tombolMode = document.getElementById('modeGambar');
+    const panel = document.getElementById('panelGambar');
+    const tebal = document.getElementById('tebal');
+    const tombolHapus = document.getElementById('penghapus');
+    const palet = document.getElementById('paletWarna');
+    const riwayat = [];            // simpanan kondisi gambar untuk "Urungkan"
+    let aktif = false, mode = 'kuas', warnaKuas = '#ee4266', terakhir = null;
+
+    // Kanvas dibuat selebar layar dan setinggi seluruh isi halaman,
+    // jadi coretan ikut bergulir saat halaman di-scroll.
+    function ukur() {
+      const d = window.devicePixelRatio || 1;
+      const w = innerWidth;
+      const t = Math.max(innerHeight, document.querySelector('.board').getBoundingClientRect().bottom + scrollY + 90);
+      const lama = document.createElement('canvas');   // simpan gambar lama
+      lama.width = kanvas.width; lama.height = kanvas.height;
+      lama.getContext('2d').drawImage(kanvas, 0, 0);
+      kanvas.width = w * d; kanvas.height = t * d;
+      kanvas.style.width = w + 'px'; kanvas.style.height = t + 'px';
+      g.setTransform(d, 0, 0, d, 0, 0);
+      g.drawImage(lama, 0, 0, lama.width / d, lama.height / d); // kembalikan gambar lama
+    }
+
+    // Palet warna (warna lego + hitam)
+    ['#1b1b2f', '#ee4266', '#3a86ff', '#2ec4b6', '#ffd23f', '#ff9f1c'].forEach(c => {
+      const b = document.createElement('button');
+      b.className = 'warna' + (c === warnaKuas ? ' on' : '');
+      b.style.background = c; b.setAttribute('aria-label', 'Warna ' + c);
+      b.onclick = () => {
+        warnaKuas = c; mode = 'kuas';
+        tombolHapus.setAttribute('aria-pressed', 'false');
+        palet.querySelectorAll('.warna').forEach(x => x.classList.toggle('on', x === b));
+      };
+      palet.appendChild(b);
+    });
+
+    const posisi = e => { const r = kanvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+
+    function garis(a, b) {
+      g.globalCompositeOperation = mode === 'hapus' ? 'destination-out' : 'source-over';
+      g.strokeStyle = warnaKuas; g.lineWidth = +tebal.value;
+      g.lineCap = 'round'; g.lineJoin = 'round';
+      g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x + 0.01, b.y); g.stroke(); // +0.01 agar klik tunggal jadi titik
+    }
+    function simpanRiwayat() {
+      riwayat.push(g.getImageData(0, 0, kanvas.width, kanvas.height));
+      if (riwayat.length > 10) riwayat.shift();
+    }
+
+    kanvas.addEventListener('pointerdown', e => {
+      if (!aktif) return;
+      simpanRiwayat();
+      kanvas.setPointerCapture(e.pointerId);
+      terakhir = posisi(e); garis(terakhir, terakhir);
+    });
+    kanvas.addEventListener('pointermove', e => {
+      if (!terakhir) return;
+      const p = posisi(e); garis(terakhir, p); terakhir = p;
+    });
+    ['pointerup', 'pointercancel'].forEach(n => kanvas.addEventListener(n, () => terakhir = null));
+
+    tombolMode.onclick = () => {
+      aktif = !aktif;
+      kanvas.classList.toggle('aktif', aktif);
+      panel.hidden = !aktif;
+      tombolMode.setAttribute('aria-pressed', aktif);
+      tombolMode.textContent = aktif ? 'Selesai menggambar' : 'Mode gambar';
+    };
+    tombolHapus.onclick = () => {
+      mode = mode === 'hapus' ? 'kuas' : 'hapus';
+      tombolHapus.setAttribute('aria-pressed', mode === 'hapus');
+    };
+    document.getElementById('urungkan').onclick = () => {
+      const s = riwayat.pop(); if (s) g.putImageData(s, 0, 0);
+    };
+    document.getElementById('hapusSemua').onclick = () => {
+      simpanRiwayat();
+      g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
+      g.clearRect(0, 0, kanvas.width, kanvas.height); g.restore();
+    };
+    document.getElementById('simpanGambar').onclick = () => {
+      const t = document.createElement('canvas'); t.width = kanvas.width; t.height = kanvas.height;
+      const c = t.getContext('2d'); c.fillStyle = '#e9ecef'; c.fillRect(0, 0, t.width, t.height);
+      c.drawImage(kanvas, 0, 0);
+      t.toBlob(blob => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = 'coretan-profil.png'; a.click();
+      });
+    };
+    addEventListener('keydown', e => { if (e.key === 'Escape' && aktif) tombolMode.click(); });
+
+    ukur();
+    addEventListener('resize', ukur);
+    addEventListener('load', ukur);
+  })();
 </script>
 </body>
 </html>
