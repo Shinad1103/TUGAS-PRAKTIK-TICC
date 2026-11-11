@@ -81,6 +81,34 @@
   .avatar .mini{transform-box:fill-box;transform-origin:center;animation:melayang 3s ease-in-out infinite}
   @media (prefers-reduced-motion:reduce){.avatar *{animation:none!important}}
 
+  /* Grid baru: galeri foto & top 3 lagu */
+  .b-album{grid-column:span 2;grid-row:span 3;background:#8e5ad7;display:flex;flex-direction:column}
+  .b-lagu{grid-column:span 2;grid-row:span 3;background:#ff5c9a;display:flex;flex-direction:column}
+  .fotoGrid{flex:1;min-height:0;margin-top:6px;display:grid;grid-template-columns:repeat(2,1fr);gap:8px;overflow:auto}
+  .fotoGrid.satu{grid-template-columns:1fr}
+  .fotoGrid button{padding:0;min-height:90px;border:3px solid #fff;border-radius:12px;overflow:hidden;
+    background:rgba(255,255,255,.25);color:#fff;font-size:12px;cursor:zoom-in}
+  .fotoGrid img{width:100%;height:100%;object-fit:cover;object-position:50% 60%;display:block}
+  .lagu{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:8px;flex:1;align-content:space-evenly}
+  .lagu li{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:14px;background:rgba(255,255,255,.22)}
+  .lagu .no{width:28px;text-align:center;font-size:26px;font-weight:700}
+  .lagu .info{flex:1;min-width:0}
+  .lagu .info b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lagu .info span{font-size:13px;opacity:.9}
+  .lagu button{width:38px;height:38px;padding:0;background:#fff;color:var(--ink)}
+  .lagu a{padding:6px 14px;border-radius:999px;background:#fff;color:var(--ink);font-size:13px;font-weight:600;text-decoration:none}
+  #lb{padding:0;border:4px solid var(--ink);border-radius:18px;max-width:94vw;background:#fff;font-family:inherit}
+  #lb::backdrop{background:rgba(27,27,47,.7)}
+  #lb img{display:block;max-width:90vw;max-height:72vh}
+  #lb .cap{display:flex;gap:8px;align-items:center;padding:10px 14px}
+  #lb .cap span{flex:1}
+
+  .animasi{flex:none;margin-top:10px;display:flex;align-items:center;gap:12px;padding:8px 14px 8px 8px;
+    border-radius:14px;background:var(--yellow);color:var(--ink)}
+  .animasi svg{flex:none;width:120px;height:120px;border-radius:10px;background:#cfe8ff}
+  .animasi b{display:block;font-size:18px}
+  .animasi span{font-size:13px}
+
   /* Chip hobi */
   .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
   .chip{background:#fff;color:var(--ink);padding:6px 14px}
@@ -89,8 +117,9 @@
 
   @media (max-width:720px){
     .board{grid-template-columns:repeat(2,1fr);grid-auto-rows:140px}
-    .b-nama,.b-foto,.b-prodi,.b-deskripsi,.b-hobi,.b-ig{grid-column:span 2}
+    .b-nama,.b-foto,.b-prodi,.b-deskripsi,.b-hobi,.b-ig,.b-album,.b-lagu{grid-column:span 2}
     .b-nama,.b-foto,.b-hobi{grid-row:span 2}
+    .b-album{grid-row:span 4}.b-lagu{grid-row:span 3}
   }
   @media (prefers-reduced-motion:reduce){.brick{transition:none}}
 </style>
@@ -113,11 +142,11 @@
 </div>
 
 <header>
-  <p><strong>Tips:</strong> Bisa diacak atau disusun lho box legonya, atau klik &quot;Mode gambar&quot; di bawah buat coret-coret halaman.</p>
+  <p><strong>Tips:</strong> Bisa diacak atau disusun lho box legonya, atau klik &quot;Mode gambar&quot; di bawah untuk mencoret-coret halaman.</p>
   <div>
     <button id="hujan">Hujan lego</button>
     <button id="bersih">Bersihkan lego</button>
-    <button id="acak">Acak susunan</button>
+    <button id="acak">Acak box/</button>
     <button id="reset">Kembalikan</button>
   </div>
 </header>
@@ -127,12 +156,44 @@
   <section class="brick b-nama" draggable="true" tabindex="0">
     <h1>Arshi Nada</h1>
     <p>NIM: 025241461103</p>
-    <p>Sekolah Tinggi Multi Media · Angkatan 2026</p>
+    <p>Sekolah Tinggi Multi Media · Angkatan 2025</p>
   </section>
 
-  <section class="brick b-foto" draggable="true" tabindex="0">
-    <!-- Ilustrasi kartun animasi: hijab, ikat kepala biru, kacamata pink, kaos navy bertulis LOTM -->
-    <svg class="avatar" viewBox="0 0 200 200" role="img" aria-label="Ilustrasi kartun profil dengan hijab dan kacamata" preserveAspectRatio="xMidYMid meet">
+  <section class="brick b-prodi" draggable="true" tabindex="0">
+    <h2>Program Studi</h2>
+    <p>Manajemen Informasi dan Komunikasi</p>
+    <p class="small">Semester 3</p>
+  </section>
+
+  <section class="brick b-deskripsi" draggable="true" tabindex="0">
+    <h2>Tentang Saya</h2>
+    <p>Seorang mahasiswa asal Solo tapi bukan tinggai di Kota Solo.</p>
+    <p>Suka belajar hal baru dan eksplorasi berbagai hal.</p>   
+    </p>
+  </section>
+
+  <section class="brick b-hobi" draggable="true" tabindex="0">
+    <h2>Hobi &amp; Minat</h2>
+    <div class="chips" id="chips">
+      <button class="chip" aria-pressed="false" data-info="Punya berbagai lagu kebangsaan dan setiap buka spotify wajib diputar.">Musik</button>
+      <button class="chip" aria-pressed="false" data-info="Suka buka portal berita random, membaca Alternative Universe, Webtton, dan majalah Bobo.">Membaca</button>
+      <button class="chip" aria-pressed="false" data-info="First Dream jadi atlet renang (walau ga tercapai), tapi cinta sama yang berbau air, laut, dan ikan.">Benerang</button>
+      <button class="chip" aria-pressed="false" data-info="Williams Racing Girls Carlos Sainz 55 and Alex Albon 23.">Watching Formula One</button>
+      <button class="chip" aria-pressed="false" data-info="Suka menyanyi bahasa asing, tapi kalau bicara atau ngomong jadi medhok.">Menyanyi</button>
+    </div>
+    <p id="hobiInfo">Klik salah satu hobi.</p>
+  </section>
+
+  <section class="brick b-ig" draggable="true" tabindex="0">
+    <a href="https://instagram.com/shinaada_" target="_blank" rel="noopener">Instagram<br>@shinaada_</a>
+  </section>
+
+  <section class="brick b-album" draggable="true" tabindex="0">
+    <h2>Foto</h2>
+    <div class="fotoGrid" id="fotoGrid"></div>
+    <!-- Foto animasi (kartun) tampil di bawah foto asli. Hapus blok .animasi ini kalau tidak dipakai -->
+    <div class="animasi">
+      <svg class="avatar" viewBox="0 0 200 200" role="img" aria-label="Ilustrasi kartun profil dengan hijab dan kacamata" preserveAspectRatio="xMidYMid meet">
       <!-- lego mini yang melayang -->
       <g class="mini" style="animation-delay:0s"><rect x="14" y="40" width="28" height="16" rx="3" fill="#ee4266"/><circle cx="21" cy="38" r="3.5" fill="#ee4266"/><circle cx="35" cy="38" r="3.5" fill="#ee4266"/></g>
       <g class="mini" style="animation-delay:-1s"><rect x="160" y="62" width="28" height="16" rx="3" fill="#2ec4b6"/><circle cx="167" cy="60" r="3.5" fill="#2ec4b6"/><circle cx="181" cy="60" r="3.5" fill="#2ec4b6"/></g>
@@ -153,7 +214,7 @@
         <!-- mata (berkedip) -->
         <ellipse class="eye" cx="86" cy="96" rx="4" ry="5" fill="#1b1b2f"/>
         <ellipse class="eye" cx="114" cy="96" rx="4" ry="5" fill="#1b1b2f"/>
-        <!-- kacamata oranye -->
+        <!-- kacamata merah muda -->
         <circle cx="86" cy="96" r="13" fill="rgba(255,255,255,.2)" stroke="#e0782f" stroke-width="3"/>
         <circle cx="114" cy="96" r="13" fill="rgba(255,255,255,.2)" stroke="#e0782f" stroke-width="3"/>
         <path d="M99 96h2" stroke="#e0782f" stroke-width="3"/>
@@ -161,38 +222,26 @@
         <path d="M91 113Q100 121 109 113" stroke="#1b1b2f" stroke-width="3.5" fill="none" stroke-linecap="round"/>
       </g>
     </svg>
-  </section>
-
-  <section class="brick b-prodi" draggable="true" tabindex="0">
-    <h2>Program Studi</h2>
-    <p>Manajemen Infomasi dan Komunikasi</p>
-    <p class="small">Semester 3</p>
-  </section>
-  
-  <section class="brick b-deskripsi" draggable="true" tabindex="0">
-    <h2>Tentang Saya</h2>
-    <p>Aku bukan tinggal di Solo kota tapi selalu ngaku kalau orang Solo.</p>
-    <p>Orang yang punya penasaran tinggi dan belajar hal baru tapi gamau pusing.</p>
-    </p>
-  </section>
-
-  <section class="brick b-hobi" draggable="true" tabindex="0">
-    <h2>Hobi &amp; Minat</h2>
-    <div class="chips" id="chips">
-      <button class="chip" aria-pressed="false" data-info="Lagu kebangsaan setiap buka spotify adalah All I Need To Hear 1975.">Musik</button>
-      <button class="chip" aria-pressed="false" data-info="Suka dan rajin buka portal berita random, membaca Alternative Universe dan majalah Bobo.">Membaca</button>
-      <button class="chip" aria-pressed="false" data-info="First Dream jadi altet, dan sekarang cinta sama renang.">Berenang</button>
-      <button class="chip" aria-pressed="false" data-info="Williams Racing Girls Carlos Sainz n Alex Albon.">Watching Formula One</button>
-      <button class="chip" aria-pressed="false" data-info="Suka nyanyi bahasa asing, tapi kalau ngomong medhok ya.">menyannyi</button>
+      <div><b>Versi animasi</b><span>Animasi dari foto Real.</span></div>
     </div>
-    <p id="hobiInfo">Klik salah satu hobi.</p>
   </section>
 
-  <section class="brick b-ig" draggable="true" tabindex="0">
-    <a href="https://instagram.com/@shinaada_" target="_blank" rel="noopener">Instagram<br>@shinaada_</a>
+  <!-- 8. Top 3 lagu favorit -->
+  <section class="brick b-lagu" draggable="true" tabindex="0">
+    <h2>Top 3 Lagu Kebangsaan</h2>
+    <ol class="lagu" id="topLagu"></ol>
+    <p class="small" id="pesanLagu" role="status"></p>
   </section>
 
 </main>
+
+<dialog id="lb" aria-label="Foto diperbesar">
+  <img id="lbImg" alt="">
+  <div class="cap"><span id="lbCap"></span>
+    <button id="lbPrev" aria-label="Foto sebelumnya">&laquo;</button>
+    <button id="lbNext" aria-label="Foto berikutnya">&raquo;</button>
+    <button id="lbTutup">Tutup</button></div>
+</dialog>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
 <script>
@@ -206,7 +255,7 @@
     if (!dragged) return;
     dragged.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', 'brick'); 
+    e.dataTransfer.setData('text/plain', 'brick'); // dibutuhkan Firefox
   });
   board.addEventListener('dragover', e => {
     e.preventDefault(); // wajib agar blok boleh "dijatuhkan"
@@ -423,6 +472,85 @@
     ukur();
     addEventListener('resize', ukur);
     addEventListener('load', ukur);
+  })();
+
+  /* =====================================================================
+     PENGATURAN FOTO & LAGU – ubah bagian ini saja (lihat tutorial)
+     ===================================================================== */
+  const FOTO = [
+    { src: "foto/foto1.jpg", ket: "Foto 1" }
+    // Tambah foto baru: hapus tanda // lalu isi nama filenya, jangan lupa koma di baris sebelumnya
+    // ,{ src: "foto/foto2.jpg", ket: "Foto 2" }
+    // ,{ src: "foto/foto3.jpg", ket: "Foto 3" }
+  ];
+
+  // Maksimal 3 lagu yang tampil. "file" dan "link" boleh dikosongkan ("").
+  const TOP_LAGU = [
+    { judul: "All I Need To Hear", artis: "1975", file: "", link: "" },
+    { judul: "Jikalau", artis: "The Adams", file: "", link: "" },
+    { judul: "Beautiful Boy", artis: "John Lennon", file: "", link: "" }
+    // contoh lengkap: { judul: "Nama Lagu", artis: "Penyanyi", file: "musik/lagu1.mp3", link: "https://open.spotify.com/track/ID" }
+  ];
+
+  /* ===================== Kode di bawah ini tidak perlu diubah ===================== */
+  (function () {
+    const $ = id => document.getElementById(id);
+
+    // --- Galeri foto + lightbox ---
+    const grid = $('fotoGrid'), lb = $('lb');
+    let fi = 0;
+    if (FOTO.length === 1) grid.classList.add('satu');
+    FOTO.forEach((f, i) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.setAttribute('aria-label', 'Perbesar: ' + f.ket);
+      const img = new Image(); img.alt = f.ket; img.draggable = false; img.src = f.src;
+      img.onerror = () => { f.gagal = true; b.disabled = true; b.textContent = 'Taruh foto di ' + f.src; };
+      b.appendChild(img); b.onclick = () => buka(i); grid.appendChild(b);
+    });
+    function buka(i) {
+      fi = i; $('lbImg').src = FOTO[i].src; $('lbImg').alt = FOTO[i].ket; $('lbCap').textContent = FOTO[i].ket;
+      if (!lb.open) lb.showModal();
+    }
+    function geser(d) {
+      let j = fi;
+      do { j = (j + d + FOTO.length) % FOTO.length; } while (FOTO[j].gagal && j !== fi);
+      buka(j);
+    }
+    $('lbPrev').onclick = () => geser(-1); $('lbNext').onclick = () => geser(1); $('lbTutup').onclick = () => lb.close();
+    lb.addEventListener('click', e => { if (e.target === lb) lb.close(); });
+    document.addEventListener('keydown', e => {
+      if (lb.open && e.key === 'ArrowLeft') geser(-1);
+      if (lb.open && e.key === 'ArrowRight') geser(1);
+    });
+
+    // --- Top 3 lagu ---
+    const audio = new Audio(); audio.preload = 'none';
+    let aktif = -1; const tombol = [];
+    const ikon = () => tombol.forEach((b, n) => { if (b) b.textContent = (n === aktif && !audio.paused) ? '\u275A\u275A' : '\u25B6'; });
+    TOP_LAGU.slice(0, 3).forEach((l, i) => {
+      const li = document.createElement('li');
+      const no = document.createElement('span'); no.className = 'no'; no.textContent = i + 1;
+      const info = document.createElement('div'); info.className = 'info';
+      const jd = document.createElement('b'); jd.textContent = l.judul;
+      const ar = document.createElement('span'); ar.textContent = l.artis;
+      info.append(jd, ar); li.append(no, info);
+      if (l.file) {
+        const p = document.createElement('button'); p.type = 'button'; p.setAttribute('aria-label', 'Putar ' + l.judul);
+        p.onclick = () => {
+          if (aktif === i && !audio.paused) { audio.pause(); return; }
+          if (aktif !== i) { audio.src = l.file; aktif = i; $('pesanLagu').textContent = ''; }
+          audio.play().catch(() => {});
+        };
+        tombol[i] = p; li.appendChild(p);
+      }
+      if (l.link) {
+        const a = document.createElement('a'); a.href = l.link; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Buka';
+        li.appendChild(a);
+      }
+      $('topLagu').appendChild(li);
+    });
+    ['play', 'pause', 'ended'].forEach(n => audio.addEventListener(n, ikon)); ikon();
+    audio.onerror = () => $('pesanLagu').textContent = 'File lagu tidak ditemukan. Cek nama file dan folder "musik".';
   })();
 </script>
 </body>
